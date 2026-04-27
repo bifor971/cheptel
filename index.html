@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐄 Cheptel — Administration</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vert:        #2d5a1b;
+    --vert-clair:  #4a8a2e;
+    --vert-pale:   #e8f5e1;
+    --terre:       #8B5E3C;
+    --terre-pale:  #f5ede6;
+    --ciel:        #3a7ca5;
+    --jaune:       #e9b44c;
+    --rouge:       #c0392b;
+    --gris-fond:   #f4f6f0;
+    --gris-bord:   #d4dcc8;
+    --blanc:       #ffffff;
+    --texte:       #1a2e0f;
+    --texte-doux:  #5a6e4a;
+    --ombre:       0 2px 12px rgba(45,90,27,0.10);
+    --ombre-forte: 0 4px 24px rgba(45,90,27,0.18);
+    --radius:      12px;
+    --radius-sm:   8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gris-fond);
+    color: var(--texte);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--vert) 0%, var(--vert-clair) 100%);
+    color: white;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    box-shadow: var(--ombre-forte);
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    letter-spacing: .5px;
+  }
+  header h1 span { font-size: 1.6rem; }
+  .header-badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: .8rem;
+    font-weight: 500;
+  }
+
+  /* ── LAYOUT ── */
+  .layout { display: flex; min-height: calc(100vh - 64px); }
+
+  /* ── SIDEBAR ── */
+  nav {
+    width: 220px;
+    background: var(--blanc);
+    border-right: 1px solid var(--gris-bord);
+    padding: 24px 0;
+    flex-shrink: 0;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .nav-section {
+    padding: 6px 16px 2px;
+    font-size: .68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--texte-doux);
+    margin-top: 12px;
+  }
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: var(--texte);
+    font-size: .9rem;
+    font-weight: 400;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+    cursor: pointer;
+  }
+  nav a:hover { background: var(--vert-pale); color: var(--vert); }
+  nav a.active {
+    background: var(--vert-pale);
+    color: var(--vert);
+    font-weight: 600;
+    border-left-color: var(--vert);
+  }
+  nav a .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+  }
+
+  /* ── SECTIONS ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--vert);
+    margin-bottom: 6px;
+  }
+  .page-subtitle {
+    color: var(--texte-doux);
+    font-size: .9rem;
+    margin-bottom: 28px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--blanc);
+    border-radius: var(--radius);
+    box-shadow: var(--ombre);
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--gris-bord);
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--vert);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--gris-bord);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── FORMULAIRES ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--texte-doux);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  input, select, textarea {
+    padding: 9px 12px;
+    border: 1.5px solid var(--gris-bord);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    color: var(--texte);
+    background: var(--blanc);
+    transition: border-color .15s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--vert);
+    box-shadow: 0 0 0 3px rgba(45,90,27,0.08);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── BOUTONS ── */
+  .btn {
+    padding: 9px 20px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--vert); color: white; }
+  .btn-primary:hover { background: var(--vert-clair); transform: translateY(-1px); box-shadow: var(--ombre); }
+  .btn-secondary { background: var(--vert-pale); color: var(--vert); border: 1.5px solid var(--gris-bord); }
+  .btn-secondary:hover { background: var(--gris-bord); }
+  .btn-danger { background: #fdecea; color: var(--rouge); border: 1.5px solid #f5c6c2; }
+  .btn-danger:hover { background: var(--rouge); color: white; }
+  .btn-sm { padding: 5px 12px; font-size: .8rem; }
+  .btn-terre { background: var(--terre); color: white; }
+  .btn-terre:hover { background: #a06e4a; }
+
+  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th {
+    background: var(--gris-fond);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--texte-doux);
+    border-bottom: 2px solid var(--gris-bord);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--gris-bord);
+    vertical-align: middle;
+  }
+  tr:hover td { background: var(--vert-pale); }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── BADGES ── */
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: .75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-actif   { background: #d4edda; color: #155724; }
+  .badge-vendu   { background: #fff3cd; color: #856404; }
+  .badge-mort    { background: #f8d7da; color: #721c24; }
+  .badge-male    { background: #cce5ff; color: #004085; }
+  .badge-femelle { background: #f8d7f5; color: #5a1060; }
+  .badge-haute   { background: #f8d7da; color: #721c24; }
+  .badge-normale { background: #d4edda; color: #155724; }
+  .badge-basse   { background: #e2e3e5; color: #383d41; }
+  .badge-fait    { background: #d4edda; color: #155724; }
+  .badge-afaire  { background: #fff3cd; color: #856404; }
+  .badge-retard  { background: #f8d7da; color: #721c24; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    background: var(--vert);
+    color: white;
+    padding: 12px 22px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-size: .9rem;
+    box-shadow: var(--ombre-forte);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all .3s;
+    z-index: 999;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.error { background: var(--rouge); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: var(--radius);
+    padding: 28px;
+    width: 90%;
+    max-width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--ombre-forte);
+    animation: slideUp .2s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--vert);
+  }
+  .modal-close {
+    background: none; border: none;
+    font-size: 1.4rem; cursor: pointer;
+    color: var(--texte-doux);
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--rouge); }
+
+  /* ── SEARCH BAR ── */
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-bar input, .search-bar select {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--texte-doux);
+  }
+  .empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty p { font-size: .95rem; }
+
+  /* ── FICHE ANIMAL (tabs) ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--gris-bord); }
+  .tab-btn {
+    padding: 8px 18px;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--texte-doux);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all .15s;
+  }
+  .tab-btn.active { color: var(--vert); border-bottom-color: var(--vert); font-weight: 600; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── LOADER ── */
+  .loader {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { display: none; }
+    main { padding: 16px; }
+    .form-grid.cols-2,
+    .form-grid.cols-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span>🐄</span> Cheptel Bovin — <em id="exploitationNom" style="font-style:normal;font-weight:300">Administration</em></h1>
+  <span class="header-badge" id="headerBadge">Chargement…</span>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="nav-section">Exploitation</div>
+    <a class="active" onclick="showSection('config')">
+      <span class="icon">⚙️</span> Configuration
+    </a>
+
+    <div class="nav-section">Cheptel</div>
+    <a onclick="showSection('animaux')">
+      <span class="icon">🐄</span> Animaux
+    </a>
+    <a onclick="showSection('groupes')">
+      <span class="icon">🌿</span> Prairies
+    </a>
+
+    <div class="nav-section">Suivi</div>
+    <a onclick="showSection('sante')">
+      <span class="icon">💉</span> Santé
+    </a>
+    <a onclick="showSection('poids')">
+      <span class="icon">⚖️</span> Pesées
+    </a>
+    <a onclick="showSection('naissances')">
+      <span class="icon">🐮</span> Naissances
+    </a>
+
+    <div class="nav-section">Planning</div>
+    <a onclick="showSection('taches')">
+      <span class="icon">📋</span> Tâches
+    </a>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- ════ CONFIG ════ -->
+    <div class="section active" id="sec-config">
+      <div class="page-title">⚙️ Configuration</div>
+      <div class="page-subtitle">Informations sur l'exploitation et le propriétaire</div>
+      <div class="card">
+        <div class="card-title">🏠 Propriétaire & Exploitation</div>
+        <div class="form-grid cols-2">
+          <div class="form-group">
+            <label>Nom du propriétaire</label>
+            <input type="text" id="cfg_proprietaire_nom" placeholder="Jean Dupont">
+          </div>
+          <div class="form-group">
+            <label>Nom de l'exploitation</label>
+            <input type="text" id="cfg_exploitation_nom" placeholder="Élevage du Soleil">
+          </div>
+          <div class="form-group full">
+            <label>Adresse</label>
+            <input type="text" id="cfg_exploitation_adresse" placeholder="Lieu-dit, 97100 Basse-Terre">
+          </div>
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input type="tel" id="cfg_exploitation_telephone" placeholder="0690 00 00 00">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="cfg_exploitation_email" placeholder="contact@elevage.fr">
+          </div>
+          <div class="form-group">
+            <label>N° SIRET</label>
+            <input type="text" id="cfg_exploitation_siret" placeholder="000 000 000 00000">
+          </div>
+          <div class="form-group">
+            <label>N° de cheptel</label>
+            <input type="text" id="cfg_numero_cheptel" placeholder="FR 97 100 000">
+          </div>
+        </div>
+        <div class="btn-group" style="margin-top:20px">
+          <button class="btn btn-primary" onclick="saveConfig()">💾 Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ ANIMAUX ════ -->
+    <div class="section" id="sec-animaux">
+      <div class="page-title">🐄 Animaux</div>
+      <div class="page-subtitle">Gestion du cheptel — fiches individuelles</div>
+
+      <div class="card">
+        <div class="search-bar">
+          <input type="text" id="searchAnimal" placeholder="🔍 Rechercher (nom, boucle, race…)" oninput="filterAnimaux()">
+          <select id="filterStatut" onchange="filterAnimaux()">
+            <option value="">Tous les statuts</option>
+            <option value="Actif">Actif</option>
+            <option value="Vendu">Vendu</option>
+            <option value="Mort">Mort</option>
+          </select>
+          <select id="filterGroupe" onchange="filterAnimaux()">
+            <option value="">Toutes les prairies</option>
+          </select>
+          <button class="btn btn-primary" onclick="openAnimalModal()">➕ Ajouter un animal</button>
+        </div>
+        <div class="table-wrap">
+          <table id="tableAnimaux">
+            <thead>
+              <tr>
+                <th>N° Boucle</th><th>Nom</th><th>Race</th><th>Sexe</th>
+                <th>Naissance</th><th>Prairie</th><th>Statut</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bodyAnimaux">
+              <tr><td colspan="8"><div class="empty"><div class="empty-icon">🐄</div><p>Chargement…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ GROUPES ════ -->
+    <div class="section" id="sec-groupes">
+      <div class="page-title">🌿 Prairies</div>
+      <div class="page-subtitle">Gestion des pâturages et lieux d'élevage</div>
+
+      <div class="card">
+        <div class="card-title">➕ Nouvelle prairie</div>
+        <div class="form-grid cols-3">
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="grp_nom" placeholder="Prairie Nord">
+          </div>
+          <div class="form-group">
+            <label>Surface (ha)</label>
+            <input type="number" id="grp_surface" placeholder="12.5" step="0.1" min="0">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="grp_description" placeholder="Proche du ruisseau…">
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="addGroupe()">➕ Ajouter</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🌿 Liste des prairies</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Nom</th><th>Surface</th><th>Description</th><th>Animaux</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="bodyGroupes">
+              <tr><td colspan="5"><div class="empty"><div class="empty-icon">🌿</div><p>Chargement…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SANTÉ ════ -->
+    <div class="section" id="sec-sante">
+      <div class="page-title">💉 Santé</div>
+      <div class="page-subtitle">Vaccins, traitements et visites vétérinaires</div>
+
+      <div class="card">
+        <div class="card-title">➕ Nouvel acte sanitaire</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Animal</label>
+            <select id="sante_animalId"><option value="">-- Choisir --</option></select>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="sante_date">
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="sante_type">
+              <option value="Vaccin">Vaccin</option>
+              <option value="Traitement">Traitement</option>
+              <option value="Visite vétérinaire">Visite vétérinaire</option>
+              <option value="Déparasitage">Déparasitage</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="sante_description" placeholder="Ex: Vaccin BVD">
+          </div>
+          <div class="form-group">
+            <label>Produit</label>
+            <input type="text" id="sante_produit" placeholder="Nom du produit">
+          </div>
+          <div class="form-group">
+            <label>Dose</label>
+            <input type="text" id="sante_dose" placeholder="Ex: 2ml">
+          </div>
+          <div class="form-group">
+            <label>Vétérinaire</label>
+            <input type="text" id="sante_veterinaire" placeholder="Dr. Martin">
+          </div>
+          <div class="form-group">
+            <label>Prochain rappel</label>
+            <input type="date" id="sante_prochainRappel">
+          </div>
+          <div class="form-group full">
+            <label>Notes</label>
+            <textarea id="sante_notes" placeholder="Observations…"></textarea>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="addSante()">💉 Enregistrer</button>
+          <button class="btn btn-secondary" onclick="clearSante()">✖ Effacer</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Historique sanitaire</div>
+        <div class="search-bar">
+          <select id="filterSanteAnimal" onchange="loadSante()">
+            <option value="">Tous les animaux</option>
+          </select>
+          <select id="filterSanteType" onchange="loadSante()">
+            <option value="">Tous les types</option>
+            <option value="Vaccin">Vaccin</option>
+            <option value="Traitement">Traitement</option>
+            <option value="Visite vétérinaire">Visite vétérinaire</option>
+            <option value="Déparasitage">Déparasitage</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Animal</th><th>Date</th><th>Type</th><th>Description</th><th>Produit</th><th>Rappel</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="bodySante">
+              <tr><td colspan="7"><div class="empty"><div class="empty-icon">💉</div><p>Chargement…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ POIDS ════ -->
+    <div class="section" id="sec-poids">
+      <div class="page-title">⚖️ Pesées</div>
+      <div class="page-subtitle">Suivi des poids par animal</div>
+
+      <div class="card">
+        <div class="card-title">➕ Nouvelle pesée</div>
+        <div class="form-grid cols-3">
+          <div class="form-group">
+            <label>Animal</label>
+            <select id="poids_animalId"><option value="">-- Choisir --</option></select>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="poids_date">
+          </div>
+          <div class="form-group">
+            <label>Poids (kg)</label>
+            <input type="number" id="poids_kg" placeholder="350" min="0" step="0.1">
+          </div>
+          <div class="form-group full">
+            <label>Notes</label>
+            <input type="text" id="poids_notes" placeholder="Observation…">
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="addPoids()">⚖️ Enregistrer</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Historique des pesées</div>
+        <div class="search-bar">
+          <select id="filterPoidsAnimal" onchange="loadPoids()">
+            <option value="">Tous les animaux</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Animal</th><th>Date</th><th>Poids (kg)</th><th>Notes</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="bodyPoids">
+              <tr><td colspan="5"><div class="empty"><div class="empty-icon">⚖️</div><p>Chargement…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ NAISSANCES ════ -->
+    <div class="section" id="sec-naissances">
+      <div class="page-title">🐮 Naissances</div>
+      <div class="page-subtitle">Suivi des vêlages</div>
+
+      <div class="card">
+        <div class="card-title">➕ Enregistrer un vêlage</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date du vêlage</label>
+            <input type="date" id="naiss_date">
+          </div>
+          <div class="form-group">
+            <label>Mère</label>
+            <select id="naiss_mereId"><option value="">-- Choisir --</option></select>
+          </div>
+          <div class="form-group">
+            <label>Père (si connu)</label>
+            <select id="naiss_pereId"><option value="">-- Inconnu --</option></select>
+          </div>
+          <div class="form-group">
+            <label>Veau (si déjà créé)</label>
+            <select id="naiss_veauId"><option value="">-- Lier plus tard --</option></select>
+          </div>
+          <div class="form-group">
+            <label>Sexe du veau</label>
+            <select id="naiss_sexe">
+              <option value="Mâle">Mâle</option>
+              <option value="Femelle">Femelle</option>
+              <option value="Inconnu">Inconnu</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Poids naissance (kg)</label>
+            <input type="number" id="naiss_poids" placeholder="35" min="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Résultat</label>
+            <select id="naiss_resultat">
+              <option value="Vivant">Vivant</option>
+              <option value="Mort-né">Mort-né</option>
+              <option value="Difficile">Difficile (aide)</option>
+              <option value="Césarienne">Césarienne</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Notes</label>
+            <textarea id="naiss_notes" placeholder="Observations sur le vêlage…"></textarea>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="addNaissance()">🐮 Enregistrer</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Historique des vêlages</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Mère</th><th>Père</th><th>Sexe</th><th>Poids</th><th>Résultat</th><th>Notes</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="bodyNaissances">
+              <tr><td colspan="8"><div class="empty"><div class="empty-icon">🐮</div><p>Chargement…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ TÂCHES ════ -->
+    <div class="section" id="sec-taches">
+      <div class="page-title">📋 Tâches</div>
+      <div class="page-subtitle">Planning et suivi des interventions</div>
+
+      <div class="card">
+        <div class="card-title">➕ Nouvelle tâche</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Titre</label>
+            <input type="text" id="tache_titre" placeholder="Ex: Déparasitage">
+          </div>
+          <div class="form-group">
+            <label>Date prévue</label>
+            <input type="date" id="tache_datePrevue">
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="tache_type">
+              <option value="Sanitaire">Sanitaire</option>
+              <option value="Alimentation">Alimentation</option>
+              <option value="Entretien">Entretien prairie</option>
+              <option value="Reproduction">Reproduction</option>
+              <option value="Administratif">Administratif</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Priorité</label>
+            <select id="tache_priorite">
+              <option value="Normale">Normale</option>
+              <option value="Haute">Haute</option>
+              <option value="Basse">Basse</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Prairie concernée</label>
+            <select id="tache_groupeId"><option value="">-- Toute l'exploitation --</option></select>
+          </div>
+          <div class="form-group full">
+            <label>Description</label>
+            <textarea id="tache_description" placeholder="Détails de la tâche…"></textarea>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="addTache()">📋 Créer la tâche</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Liste des tâches</div>
+        <div class="search-bar">
+          <select id="filterTacheStatut" onchange="loadTaches()">
+            <option value="">Tous les statuts</option>
+            <option value="À faire">À faire</option>
+            <option value="Fait">Fait</option>
+          </select>
+          <select id="filterTacheType" onchange="loadTaches()">
+            <option value="">Tous les types</option>
+            <option value="Sanitaire">Sanitaire</option>
+            <option value="Alimentation">Alimentation</option>
+            <option value="Entretien">Entretien prairie</option>
+            <option value="Reproduction">Reproduction</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Titre</th><th>Type</th><th>Date prévue</th><th>Priorité</th><th>Statut</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="bodyTaches">
+              <tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>Chargement…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL ANIMAL -->
+<div class="modal-overlay" id="modalAnimal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalAnimalTitle">🐄 Nouvel animal</div>
+      <button class="modal-close" onclick="closeModal('modalAnimal')">✕</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tabInfos')">Infos générales</button>
+      <button class="tab-btn" onclick="switchTab('tabFiliation')">Filiation</button>
+    </div>
+    <div class="tab-panel active" id="tabInfos">
+      <div class="form-grid cols-2">
+        <div class="form-group">
+          <label>N° de boucle *</label>
+          <input type="text" id="animal_numBoucle" placeholder="FR 97 100 000 001">
+        </div>
+        <div class="form-group">
+          <label>Nom</label>
+          <input type="text" id="animal_nom" placeholder="Marguerite">
+        </div>
+        <div class="form-group">
+          <label>Race</label>
+          <input type="text" id="animal_race" placeholder="Limousin, Créole…">
+        </div>
+        <div class="form-group">
+          <label>Sexe</label>
+          <select id="animal_sexe">
+            <option value="Femelle">Femelle</option>
+            <option value="Mâle">Mâle</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date de naissance</label>
+          <input type="date" id="animal_dateNaissance">
+        </div>
+        <div class="form-group">
+          <label>Prairie actuelle</label>
+          <select id="animal_groupeId"><option value="">-- Non assigné --</option></select>
+        </div>
+        <div class="form-group">
+          <label>Statut</label>
+          <select id="animal_statut">
+            <option value="Actif">Actif</option>
+            <option value="Vendu">Vendu</option>
+            <option value="Mort">Mort</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Notes</label>
+          <textarea id="animal_notes" placeholder="Observations…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tabFiliation">
+      <div class="form-grid cols-2">
+        <div class="form-group">
+          <label>Père</label>
+          <select id="animal_pereId"><option value="">-- Inconnu --</option></select>
+        </div>
+        <div class="form-group">
+          <label>Mère</label>
+          <select id="animal_mereId"><option value="">-- Inconnue --</option></select>
+        </div>
+      </div>
+      <p style="margin-top:16px;font-size:.85rem;color:var(--texte-doux)">
+        💡 Si les parents ne sont pas encore dans le système, laissez vide et mettez à jour plus tard.
+      </p>
+    </div>
+    <input type="hidden" id="animal_editId">
+    <div class="btn-group" style="margin-top:20px">
+      <button class="btn btn-primary" onclick="saveAnimal()">💾 Enregistrer</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalAnimal')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbyntTJ7Oq5fPd8Qisd2QF30-4uWMPifWlfX741MsdoRtWWaY3AqoSu0gJEkGmXuB1G3/exec';
+
+// ── STATE ────────────────────────────────────────────────────
+let state = {
+  animaux: [], groupes: [], sante: [], poids: [], naissances: [], taches: []
+};
+
+// ── API CALL ─────────────────────────────────────────────────
+async function api(params) {
+  const url = API + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+async function init() {
+  await loadConfig();
+  await loadGroupes();
+  await loadAnimaux();
+  await loadSante();
+  await loadPoids();
+  await loadNaissances();
+  await loadTaches();
+  // Dates par défaut = aujourd'hui
+  const today = new Date().toISOString().split('T')[0];
+  ['sante_date','poids_date','naiss_date','tache_datePrevue'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = today;
+  });
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── CONFIG ───────────────────────────────────────────────────
+async function loadConfig() {
+  const r = await api({ action: 'getConfig' });
+  if (!r.success) return;
+  const c = r.data;
+  Object.keys(c).forEach(k => {
+    const el = document.getElementById('cfg_' + k);
+    if (el) el.value = c[k] || '';
+  });
+  if (c.exploitation_nom) {
+    document.getElementById('exploitationNom').textContent = c.exploitation_nom;
+  }
+  document.getElementById('headerBadge').textContent = c.numero_cheptel || 'Admin';
+}
+
+async function saveConfig() {
+  const params = { action: 'setConfig' };
+  ['proprietaire_nom','exploitation_nom','exploitation_adresse',
+   'exploitation_telephone','exploitation_email','exploitation_siret','numero_cheptel'].forEach(k => {
+    const el = document.getElementById('cfg_' + k);
+    if (el) params[k] = el.value;
+  });
+  const r = await api(params);
+  if (r.success) {
+    toast('Configuration enregistrée ✓');
+    document.getElementById('exploitationNom').textContent = params.exploitation_nom || 'Administration';
+    document.getElementById('headerBadge').textContent = params.numero_cheptel || 'Admin';
+  } else toast('Erreur : ' + r.error, true);
+}
+
+// ── GROUPES ──────────────────────────────────────────────────
+async function loadGroupes() {
+  const r = await api({ action: 'getGroupes' });
+  if (!r.success) return;
+  state.groupes = r.data;
+  renderGroupes();
+  populateGroupeSelects();
+}
+
+function renderGroupes() {
+  const tbody = document.getElementById('bodyGroupes');
+  if (!state.groupes.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="empty-icon">🌿</div><p>Aucune prairie</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.groupes.map(g => {
+    const count = state.animaux.filter(a => a.GroupeID === g.ID && a.Statut === 'Actif').length;
+    return `<tr>
+      <td><strong>${g.Nom}</strong></td>
+      <td>${g.Surface_ha ? g.Surface_ha + ' ha' : '—'}</td>
+      <td>${g.Description || '—'}</td>
+      <td><span class="badge badge-actif">${count} animal${count>1?'s':''}</span></td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="editGroupe('${g.ID}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteGroupe('${g.ID}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function populateGroupeSelects() {
+  const opts = '<option value="">-- Non assigné --</option>' +
+    state.groupes.map(g => `<option value="${g.ID}">${g.Nom}</option>`).join('');
+  const optsTache = '<option value="">-- Toute l\'exploitation --</option>' +
+    state.groupes.map(g => `<option value="${g.ID}">${g.Nom}</option>`).join('');
+  ['animal_groupeId'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+  ['filterGroupe','tache_groupeId'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = id === 'filterGroupe'
+      ? '<option value="">Toutes les prairies</option>' + state.groupes.map(g => `<option value="${g.ID}">${g.Nom}</option>`).join('')
+      : optsTache;
+  });
+}
+
+async function addGroupe() {
+  const nom = document.getElementById('grp_nom').value.trim();
+  if (!nom) return toast('Le nom est requis', true);
+  const r = await api({
+    action: 'addGroupe',
+    nom,
+    surface_ha: document.getElementById('grp_surface').value,
+    description: document.getElementById('grp_description').value
+  });
+  if (r.success) {
+    toast('Prairie ajoutée ✓');
+    ['grp_nom','grp_surface','grp_description'].forEach(id => document.getElementById(id).value = '');
+    await loadGroupes();
+  } else toast('Erreur : ' + r.error, true);
+}
+
+function editGroupe(id) {
+  const g = state.groupes.find(x => x.ID === id);
+  if (!g) return;
+  document.getElementById('grp_nom').value = g.Nom;
+  document.getElementById('grp_surface').value = g.Surface_ha;
+  document.getElementById('grp_description').value = g.Description;
+  const btn = document.querySelector('#sec-groupes .card .btn-primary');
+  btn.textContent = '💾 Mettre à jour';
+  btn.onclick = async () => {
+    await api({ action: 'updateGroupe', id, nom: document.getElementById('grp_nom').value, surface_ha: document.getElementById('grp_surface').value, description: document.getElementById('grp_description').value });
+    toast('Prairie mise à jour ✓');
+    ['grp_nom','grp_surface','grp_description'].forEach(i => document.getElementById(i).value = '');
+    btn.textContent = '➕ Ajouter'; btn.onclick = addGroupe;
+    await loadGroupes();
+  };
+}
+
+async function deleteGroupe(id) {
+  if (!confirm('Supprimer cette prairie ?')) return;
+  const r = await api({ action: 'deleteGroupe', id });
+  if (r.success) { toast('Prairie supprimée'); await loadGroupes(); }
+  else toast('Erreur : ' + r.error, true);
+}
+
+// ── ANIMAUX ──────────────────────────────────────────────────
+async function loadAnimaux() {
+  const r = await api({ action: 'getAnimaux' });
+  if (!r.success) return;
+  state.animaux = r.data;
+  renderAnimaux(state.animaux);
+  populateAnimalSelects();
+}
+
+function renderAnimaux(list) {
+  const tbody = document.getElementById('bodyAnimaux');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">🐄</div><p>Aucun animal</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(a => {
+    const groupe = state.groupes.find(g => g.ID === a.GroupeID);
+    return `<tr>
+      <td><strong>${a.NumBoucle || '—'}</strong></td>
+      <td>${a.Nom || '—'}</td>
+      <td>${a.Race || '—'}</td>
+      <td><span class="badge ${a.Sexe === 'Mâle' ? 'badge-male' : 'badge-femelle'}">${a.Sexe || '—'}</span></td>
+      <td>${formatDate(a.DateNaissance)}</td>
+      <td>${groupe ? groupe.Nom : '—'}</td>
+      <td><span class="badge badge-${(a.Statut||'').toLowerCase()}">${a.Statut || '—'}</span></td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="editAnimal('${a.ID}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteAnimal('${a.ID}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterAnimaux() {
+  const search = document.getElementById('searchAnimal').value.toLowerCase();
+  const statut = document.getElementById('filterStatut').value;
+  const groupe = document.getElementById('filterGroupe').value;
+  const filtered = state.animaux.filter(a => {
+    const matchSearch = !search ||
+      (a.NumBoucle||'').toLowerCase().includes(search) ||
+      (a.Nom||'').toLowerCase().includes(search) ||
+      (a.Race||'').toLowerCase().includes(search);
+    const matchStatut = !statut || a.Statut === statut;
+    const matchGroupe = !groupe || a.GroupeID === groupe;
+    return matchSearch && matchStatut && matchGroupe;
+  });
+  renderAnimaux(filtered);
+}
+
+function populateAnimalSelects() {
+  const makeOpts = (placeholder) => `<option value="">${placeholder}</option>` +
+    state.animaux.map(a => `<option value="${a.ID}">${a.Nom || a.NumBoucle} (${a.NumBoucle})</option>`).join('');
+  const males   = state.animaux.filter(a => a.Sexe === 'Mâle');
+  const femelles = state.animaux.filter(a => a.Sexe === 'Femelle');
+
+  ['sante_animalId','poids_animalId','naiss_veauId','filterSanteAnimal','filterPoidsAnimal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = makeOpts(id.startsWith('filter') ? 'Tous les animaux' : '-- Choisir --');
+  });
+  const pereEl = document.getElementById('animal_pereId');
+  if (pereEl) pereEl.innerHTML = '<option value="">-- Inconnu --</option>' +
+    males.map(a => `<option value="${a.ID}">${a.Nom || a.NumBoucle}</option>`).join('');
+  const mereEl = document.getElementById('animal_mereId');
+  if (mereEl) mereEl.innerHTML = '<option value="">-- Inconnue --</option>' +
+    femelles.map(a => `<option value="${a.ID}">${a.Nom || a.NumBoucle}</option>`).join('');
+  const naissPerEl = document.getElementById('naiss_pereId');
+  if (naissPerEl) naissPerEl.innerHTML = '<option value="">-- Inconnu --</option>' +
+    males.map(a => `<option value="${a.ID}">${a.Nom || a.NumBoucle}</option>`).join('');
+  const naissMereEl = document.getElementById('naiss_mereId');
+  if (naissMereEl) naissMereEl.innerHTML = '<option value="">-- Choisir --</option>' +
+    femelles.map(a => `<option value="${a.ID}">${a.Nom || a.NumBoucle}</option>`).join('');
+}
+
+function openAnimalModal(id) {
+  document.getElementById('modalAnimalTitle').textContent = '🐄 Nouvel animal';
+  document.getElementById('animal_editId').value = '';
+  ['animal_numBoucle','animal_nom','animal_race','animal_notes'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('animal_sexe').value = 'Femelle';
+  document.getElementById('animal_statut').value = 'Actif';
+  document.getElementById('animal_dateNaissance').value = '';
+  document.getElementById('animal_groupeId').value = '';
+  document.getElementById('animal_pereId').value = '';
+  document.getElementById('animal_mereId').value = '';
+  switchTab('tabInfos');
+  document.getElementById('modalAnimal').classList.add('open');
+}
+
+function editAnimal(id) {
+  const a = state.animaux.find(x => x.ID === id);
+  if (!a) return;
+  document.getElementById('modalAnimalTitle').textContent = '✏️ Modifier l\'animal';
+  document.getElementById('animal_editId').value = id;
+  document.getElementById('animal_numBoucle').value = a.NumBoucle || '';
+  document.getElementById('animal_nom').value = a.Nom || '';
+  document.getElementById('animal_race').value = a.Race || '';
+  document.getElementById('animal_sexe').value = a.Sexe || 'Femelle';
+  document.getElementById('animal_dateNaissance').value = a.DateNaissance || '';
+  document.getElementById('animal_groupeId').value = a.GroupeID || '';
+  document.getElementById('animal_statut').value = a.Statut || 'Actif';
+  document.getElementById('animal_notes').value = a.Notes || '';
+  document.getElementById('animal_pereId').value = a.PereID || '';
+  document.getElementById('animal_mereId').value = a.MereID || '';
+  switchTab('tabInfos');
+  document.getElementById('modalAnimal').classList.add('open');
+}
+
+async function saveAnimal() {
+  const editId = document.getElementById('animal_editId').value;
+  const numBoucle = document.getElementById('animal_numBoucle').value.trim();
+  if (!numBoucle) return toast('Le numéro de boucle est requis', true);
+  const params = {
+    action: editId ? 'updateAnimal' : 'addAnimal',
+    numBoucle,
+    nom: document.getElementById('animal_nom').value,
+    race: document.getElementById('animal_race').value,
+    sexe: document.getElementById('animal_sexe').value,
+    dateNaissance: document.getElementById('animal_dateNaissance').value,
+    groupeId: document.getElementById('animal_groupeId').value,
+    statut: document.getElementById('animal_statut').value,
+    notes: document.getElementById('animal_notes').value,
+    pereId: document.getElementById('animal_pereId').value,
+    mereId: document.getElementById('animal_mereId').value,
+  };
+  if (editId) params.id = editId;
+  const r = await api(params);
+  if (r.success) {
+    toast(editId ? 'Animal mis à jour ✓' : 'Animal ajouté ✓');
+    closeModal('modalAnimal');
+    await loadAnimaux();
+    renderGroupes();
+  } else toast('Erreur : ' + r.error, true);
+}
+
+async function deleteAnimal(id) {
+  if (!confirm('Supprimer cet animal ?')) return;
+  const r = await api({ action: 'deleteAnimal', id });
+  if (r.success) { toast('Animal supprimé'); await loadAnimaux(); }
+  else toast('Erreur : ' + r.error, true);
+}
+
+// ── SANTÉ ────────────────────────────────────────────────────
+async function loadSante() {
+  const animalId = document.getElementById('filterSanteAnimal')?.value || '';
+  const r = await api({ action: 'getSante', animalId });
+  if (!r.success) return;
+  let data = r.data;
+  const type = document.getElementById('filterSanteType')?.value || '';
+  if (type) data = data.filter(s => s.Type === type);
+  state.sante = data;
+  const tbody = document.getElementById('bodySante');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">💉</div><p>Aucun acte sanitaire</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(s => {
+    const animal = state.animaux.find(a => a.ID === s.AnimalID);
+    return `<tr>
+      <td>${animal ? (animal.Nom || animal.NumBoucle) : s.AnimalID}</td>
+      <td>${formatDate(s.Date)}</td>
+      <td><span class="badge badge-actif">${s.Type}</span></td>
+      <td>${s.Description || '—'}</td>
+      <td>${s.Produit || '—'} ${s.Dose ? '('+s.Dose+')' : ''}</td>
+      <td>${s.ProchainRappel ? '<span style="color:var(--terre);font-weight:600">📅 '+formatDate(s.ProchainRappel)+'</span>' : '—'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteSante('${s.ID}')">🗑️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function addSante() {
+  const animalId = document.getElementById('sante_animalId').value;
+  if (!animalId) return toast('Choisir un animal', true);
+  const r = await api({
+    action: 'addSante',
+    animalId,
+    date: document.getElementById('sante_date').value,
+    type: document.getElementById('sante_type').value,
+    description: document.getElementById('sante_description').value,
+    produit: document.getElementById('sante_produit').value,
+    dose: document.getElementById('sante_dose').value,
+    veterinaire: document.getElementById('sante_veterinaire').value,
+    prochainRappel: document.getElementById('sante_prochainRappel').value,
+    notes: document.getElementById('sante_notes').value,
+  });
+  if (r.success) { toast('Acte sanitaire enregistré ✓'); clearSante(); await loadSante(); }
+  else toast('Erreur : ' + r.error, true);
+}
+
+function clearSante() {
+  ['sante_animalId','sante_description','sante_produit','sante_dose','sante_veterinaire','sante_notes','sante_prochainRappel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.tagName === 'SELECT' ? (el.options[0]?.value || '') : '';
+  });
+}
+
+async function deleteSante(id) {
+  if (!confirm('Supprimer cet acte sanitaire ?')) return;
+  const r = await api({ action: 'deleteSante', id });
+  if (r.success) { toast('Supprimé'); await loadSante(); }
+}
+
+// ── POIDS ────────────────────────────────────────────────────
+async function loadPoids() {
+  const animalId = document.getElementById('filterPoidsAnimal')?.value || '';
+  const r = await api({ action: 'getPoids', animalId });
+  if (!r.success) return;
+  state.poids = r.data;
+  const tbody = document.getElementById('bodyPoids');
+  if (!r.data.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="empty-icon">⚖️</div><p>Aucune pesée</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = r.data.map(p => {
+    const animal = state.animaux.find(a => a.ID === p.AnimalID);
+    return `<tr>
+      <td>${animal ? (animal.Nom || animal.NumBoucle) : p.AnimalID}</td>
+      <td>${formatDate(p.Date)}</td>
+      <td><strong>${p.Poids_kg} kg</strong></td>
+      <td>${p.Notes || '—'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deletePoids('${p.ID}')">🗑️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function addPoids() {
+  const animalId = document.getElementById('poids_animalId').value;
+  const kg = document.getElementById('poids_kg').value;
+  if (!animalId || !kg) return toast('Animal et poids requis', true);
+  const r = await api({
+    action: 'addPoids',
+    animalId,
+    date: document.getElementById('poids_date').value,
+    poids_kg: kg,
+    notes: document.getElementById('poids_notes').value,
+  });
+  if (r.success) {
+    toast('Pesée enregistrée ✓');
+    document.getElementById('poids_kg').value = '';
+    document.getElementById('poids_notes').value = '';
+    await loadPoids();
+  } else toast('Erreur : ' + r.error, true);
+}
+
+async function deletePoids(id) {
+  if (!confirm('Supprimer cette pesée ?')) return;
+  const r = await api({ action: 'deletePoids', id });
+  if (r.success) { toast('Supprimé'); await loadPoids(); }
+}
+
+// ── NAISSANCES ────────────────────────────────────────────────
+async function loadNaissances() {
+  const r = await api({ action: 'getNaissances' });
+  if (!r.success) return;
+  state.naissances = r.data;
+  const tbody = document.getElementById('bodyNaissances');
+  if (!r.data.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">🐮</div><p>Aucun vêlage enregistré</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = r.data.map(n => {
+    const mere = state.animaux.find(a => a.ID === n.MereID);
+    const pere = state.animaux.find(a => a.ID === n.PereID);
+    return `<tr>
+      <td>${formatDate(n.Date)}</td>
+      <td>${mere ? (mere.Nom || mere.NumBoucle) : '—'}</td>
+      <td>${pere ? (pere.Nom || pere.NumBoucle) : '—'}</td>
+      <td>${n.Sexe || '—'}</td>
+      <td>${n.Poids_kg ? n.Poids_kg + ' kg' : '—'}</td>
+      <td><span class="badge ${n.Resultat === 'Vivant' ? 'badge-actif' : 'badge-mort'}">${n.Resultat}</span></td>
+      <td>${n.Notes || '—'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteNaissance('${n.ID}')">🗑️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function addNaissance() {
+  const mereId = document.getElementById('naiss_mereId').value;
+  const date = document.getElementById('naiss_date').value;
+  if (!mereId || !date) return toast('Mère et date requis', true);
+  const r = await api({
+    action: 'addNaissance',
+    date, mereId,
+    pereId: document.getElementById('naiss_pereId').value,
+    veauId: document.getElementById('naiss_veauId').value,
+    sexe: document.getElementById('naiss_sexe').value,
+    poids_kg: document.getElementById('naiss_poids').value,
+    resultat: document.getElementById('naiss_resultat').value,
+    notes: document.getElementById('naiss_notes').value,
+  });
+  if (r.success) { toast('Vêlage enregistré ✓'); await loadNaissances(); }
+  else toast('Erreur : ' + r.error, true);
+}
+
+async function deleteNaissance(id) {
+  if (!confirm('Supprimer ce vêlage ?')) return;
+  const r = await api({ action: 'deleteNaissance', id });
+  if (r.success) { toast('Supprimé'); await loadNaissances(); }
+}
+
+// ── TÂCHES ────────────────────────────────────────────────────
+async function loadTaches() {
+  const r = await api({ action: 'getTaches' });
+  if (!r.success) return;
+  let data = r.data;
+  const statut = document.getElementById('filterTacheStatut')?.value || '';
+  const type = document.getElementById('filterTacheType')?.value || '';
+  if (statut) data = data.filter(t => t.Statut === statut);
+  if (type) data = data.filter(t => t.Type === type);
+  state.taches = data;
+  const tbody = document.getElementById('bodyTaches');
+  const today = new Date().toISOString().split('T')[0];
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>Aucune tâche</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(t => {
+    const retard = t.Statut === 'À faire' && t.DatePrevue && t.DatePrevue < today;
+    const statutBadge = retard ? 'badge-retard' : (t.Statut === 'Fait' ? 'badge-fait' : 'badge-afaire');
+    const statutLabel = retard ? '⚠️ En retard' : t.Statut;
+    return `<tr>
+      <td><strong>${t.Titre}</strong>${t.Description ? '<br><small style="color:var(--texte-doux)">'+t.Description+'</small>' : ''}</td>
+      <td><span class="badge badge-basse">${t.Type}</span></td>
+      <td>${formatDate(t.DatePrevue)}</td>
+      <td><span class="badge badge-${(t.Priorite||'normale').toLowerCase()}">${t.Priorite}</span></td>
+      <td><span class="badge ${statutBadge}">${statutLabel}</span></td>
+      <td style="white-space:nowrap">
+        ${t.Statut !== 'Fait' ? `<button class="btn btn-sm btn-secondary" onclick="marquerFait('${t.ID}')">✅</button>` : ''}
+        <button class="btn btn-sm btn-danger" onclick="deleteTache('${t.ID}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function addTache() {
+  const titre = document.getElementById('tache_titre').value.trim();
+  const datePrevue = document.getElementById('tache_datePrevue').value;
+  if (!titre) return toast('Le titre est requis', true);
+  const r = await api({
+    action: 'addTache',
+    titre, datePrevue,
+    type: document.getElementById('tache_type').value,
+    priorite: document.getElementById('tache_priorite').value,
+    groupeId: document.getElementById('tache_groupeId').value,
+    description: document.getElementById('tache_description').value,
+  });
+  if (r.success) {
+    toast('Tâche créée ✓');
+    document.getElementById('tache_titre').value = '';
+    document.getElementById('tache_description').value = '';
+    await loadTaches();
+  } else toast('Erreur : ' + r.error, true);
+}
+
+async function marquerFait(id) {
+  const today = new Date().toISOString().split('T')[0];
+  const r = await api({ action: 'updateTache', id, statut: 'Fait', dateRealisation: today });
+  if (r.success) { toast('Tâche marquée comme faite ✓'); await loadTaches(); }
+}
+
+async function deleteTache(id) {
+  if (!confirm('Supprimer cette tâche ?')) return;
+  const r = await api({ action: 'deleteTache', id });
+  if (r.success) { toast('Supprimé'); await loadTaches(); }
+}
+
+// ── MODAL UTILS ──────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── UTILS ────────────────────────────────────────────────────
+function formatDate(d) {
+  if (!d) return '—';
+  const parts = d.split('-');
+  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return d;
+}
+
+function toast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (isError ? ' error' : '');
+  setTimeout(() => el.className = '', 3000);
+}
+
+// Fermer modal en cliquant dehors
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ── DÉMARRAGE ────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
